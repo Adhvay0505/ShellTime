@@ -7,6 +7,9 @@ while true
 do
 	clear
 	echo "${Bold}$Red$"
-	java -cp /home/adhvay/IdeaProjects/java_practice/out/production/java_practice time #add the path to the directory containing the java file 	
+ 
+ 	#add the path to the directory containing the java file 
+	java -cp /home/adhvay/IdeaProjects/java_practice/out/production/java_practice time 
+   		
 	sleep 1 
 done 
