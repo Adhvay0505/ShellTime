@@ -1,0 +1,90 @@
+#!/bin/bash
+
+# Colors for styling
+YELLOW='\033[1;33m'
+RED='\033[1;31m'
+NC='\033[0m'
+
+# Check if figlet is installed
+if ! command -v figlet >/dev/null 2>&1; then
+    echo -e "${RED}Error: 'figlet' is not installed.${NC}"
+    echo "Please install figlet to display the clock in big digits."
+    echo ""
+    echo "On Debian/Ubuntu: sudo apt install figlet"
+    echo "On Fedora: sudo dnf install figlet"
+    echo "On Arch Linux: sudo pacman -S figlet"
+    echo "On macOS (with Homebrew): brew install figlet"
+    exit 1
+fi
+
+# Optional: Alarm time format HH:MM (24-hour), passed as first argument
+ALARM_TIME=$1
+alarm_triggered=0
+
+if [ -n "$ALARM_TIME" ]; then
+    echo "Alarm set for: $ALARM_TIME"
+fi
+
+while :; do
+    clear
+
+    # Get terminal dimensions
+    width=$(tput cols)
+    height=$(tput lines)
+
+    # Get current date, day and time (big digits)
+    date_str=$(date +"%d-%m-%y")
+    day_str=$(date +"%A")
+    time_str=$(date +"%T" | figlet)
+
+    # Count lines for vertical centering
+    clock_lines=$(echo "$time_str" | wc -l)
+
+    # Calculate total lines needed:
+    # 1 line for date, 1 blank line, clock lines, 1 blank line, 1 line for day
+    total_blocks=$((1 + 1 + clock_lines + 1 + 1))
+    top_padding=$(( (height - total_blocks) / 2 ))
+    [ $top_padding -lt 0 ] && top_padding=0
+
+    # Print blank lines for vertical centering
+    for ((i=0; i<top_padding; i++)); do
+        echo
+    done
+
+    # Center the date
+    printf "%*s\n" $(( (width + ${#date_str}) / 2 )) "$date_str"
+    echo
+
+    # Center and print the figlet clock in yellow
+    echo -e "${YELLOW}"
+    while IFS= read -r line; do
+        len=${#line}
+        pad=$(( (width - len) / 2 ))
+        [ $pad -lt 0 ] && pad=0
+        printf "%*s%s\n" $pad "" "$line"
+    done <<< "$time_str"
+    echo -e "${NC}"
+    echo
+
+    # Center and print the day of the week
+    printf "%*s\n" $(( (width + ${#day_str}) / 2 )) "$day_str"
+    echo
+
+    # Alarm check (if alarm time is set)
+    if [ -n "$ALARM_TIME" ]; then
+        current_time=$(date +"%H:%M")  # HH:MM format
+
+        if [[ "$current_time" == "$ALARM_TIME" && $alarm_triggered -eq 0 ]]; then
+            alarm_triggered=1
+            for i in {1..60}; do
+                echo -e "${RED}***** ALARM! It's $ALARM_TIME *****${NC}"
+                # Terminal bell sound
+                echo -e "\a"
+                sleep 1
+            done
+        fi
+    fi
+
+    sleep 1
+done
+
