@@ -3,7 +3,7 @@
 - Current date (DD-MM-YY)
 - Large ASCII-art digital clock (using `figlet`)
 - Day of the week
-- Optional alarm functionality with beep and alert message
+- Alarm functionality with beep and alert message
 
 ### Requirements
 
